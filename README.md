@@ -10,8 +10,10 @@ The functions are all take the following elements as arguments:
   - A dataframe with named columns "Date", and at least one of the following "TTCmin", "T2min", "PET" measurements. For the diffpi functions, you have to enter two dataframes as input.
   - A numeric threshold corresponding to the threshold of the GPD. The input name is either thresh, uNE or uDK. 
   - A numeric quantile q or x, which corresponds to the desired value for which one wants to compute the intensity or probability for S<q.
-  - A string corresponding to the desired SMoS which one wants to use to estimate the (near) crash intensity or probability.
+  - A string corresponding to the desired SMoS which one wants to use to estimate the (near) crash intensity or probability. 
 
+# Date
+The "Date" columns of the dataframes correspond to the time points of the interactions. They have to include date and time in the following format:
 
-
+y-m-d h:m:s
 
