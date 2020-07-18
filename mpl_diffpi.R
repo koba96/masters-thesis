@@ -78,7 +78,7 @@ pois.est = function(data, thresh, measure, x){
 ### confidence intervals for pi_ne - pi_dk based on modified profile likelihood ####
 
 
-conf.pi.mpl = function(dataNE, dataDK, uNE, uDK, q, measure1){
+mpl_diffpi = function(dataNE, dataDK, uNE, uDK, q, measure1){
   thresh1 = uDK
   thresh2 = uNE
   x1 = q
@@ -773,13 +773,7 @@ conf.pi.mpl = function(dataNE, dataDK, uNE, uDK, q, measure1){
   return(ests)
 }
 
-xvals = seq(0, min(umat[5,2], umat[2,2])-0.1, length.out = 10)
-results = matrix(nrow = length(xvals), ncol = 3)
 
-for(i in 1:length(xvals)){
-  results[i, ] = conf.pi.mpl(dataNE = ne2, dataDK = dk3, uNE = umat[5,2], uDK = umat[3,2], 
-                             q = xvals[i], measure1 = "T2min")
-}
-results
+
 
 
