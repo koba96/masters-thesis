@@ -78,7 +78,7 @@ pois.est = function(data, thresh, measure, x){
 
 #### Modified profile likelihood ######
 
-mplfunc.alt = function(data, measure1, thresh1, x1){
+mpl_lambda = function(data, measure1, thresh1, x1){
   poiss_time = as.POSIXct(data[["Date"]], tz = "", tryFormats = "%Y-%m-%d %H:%M:%OS")
   b00 = as.POSIXct(paste(str_sub(data[['Date']][1], 1, 10), "00:00:01"),
                    tz = "", tryFormats = "%Y-%m-%d %H:%M:%OS")
