@@ -5,6 +5,81 @@ library('plotrix')
 library('extRemes')
 library('tidyverse')
 
+##### Functions for computing maximum likelihood estimates 
+##### to initialize profile likelihood
+
+ascovar = function(l, p, g, s, t){
+  covar = matrix(nrow = 4, ncol = 4)
+  covar[1,] = c(l/t, 0, 0, 0)
+  covar[2,] = c(0, p*(1-p)/(l*t), 0, 0)
+  covar[3,] = c(0, 0, ((1+g)^2)/(l*t*p), (s*(1+g))/(l*t*p))
+  covar[4,] = c(0, 0, (s*(1+g))/(l*t*p), 2*((1+g)*s^2)/(l*t*p))
+  return(covar)
+}
+
+pois.est = function(data, thresh, measure, x){
+  thresh = -thresh
+  z = -x-thresh
+  gpddata = data[data[measure] != -1,]
+  gpddata = gpddata[gpddata[measure] < -thresh,]
+  
+  b00 = as.POSIXct(paste(str_sub(data[['Date']][1], 1, 10), "00:00:01"),
+                   tz = "", tryFormats = "%Y-%m-%d %H:%M:%OS")
+  bend = as.POSIXct(paste(str_sub(data[['Date']][length(data[,1])],1,10), "23:59:59"),
+                    tz = "", tryFormats = "%Y-%m-%d %H:%M:%OS")
+  
+  t = as.numeric(difftime(bend, b00, units = "hours"))
+  
+  l = length(data[,1])/t
+  p = sum(-gpddata[[measure]] > thresh)/length(data[,1])
+  gpdobj = fevd(-gpddata[[measure]], threshold = thresh, type = "GP", method = "MLE")
+  g = gpdobj$results$par[['shape']]
+  s = gpdobj$results$par[['scale']]
+  lowend = -thresh+s/g
+  estimates = matrix(c(l, p, g, s, lowend), nrow = 1, ncol = 5)
+  colnames(estimates) = c("lambda", "Pi", "Gamma", "Sigma", "Lower endpoint")
+  
+  
+  #standard errors and confidence intervals for parameters
+  c = ascovar(l, p, g, s, t)
+  std.err = matrix(c(sqrt(c[1,1]), sqrt(c[2,2]), sqrt(c[3,3]), sqrt(c[4,4])),
+                   nrow = 1, ncol = 4)
+  colnames(std.err) = c("lambda", "Pi", "Gamma", "Sigma")
+  
+  
+  confint = matrix(nrow = 4, ncol = 2)
+  confint[1,] = c(l-1.96*std.err["lambda"], l+1.96*std.err["lambda"])
+  confint[2,] = c(p-1.96*std.err["Pi"], p+1.96*std.err["Pi"])
+  confint[3,] = c(g-1.96*std.err["Gamma"], g+1.96*std.err["Gamma"])
+  confint[4,] = c(s-1.96*std.err["Sigma"], s+1.96*std.err["Sigma"])
+  
+  # Estimate of lambda for crashes and confidence interval using delta method
+  lcrash = l*t*p*(1+g*(z)/s)^(-1/g)
+  
+  h = matrix(nrow = 1, ncol = 4)
+  h[1] = t*p*(1+g*(z/s))^(-1/g)
+  h[2] = l*t*(1+g*(z/s))^(-1/g)
+  h[3] = l*t*p*((1/(g^2))*log(1+g*z/s)-(z/(s*g+z*g^2)))*(1+g*z/s)^(-1/g)
+  h[4] = l*t*p*(z/(s^2))*(1+g*z/s)^(-1/g - 1)
+  
+  vlcrash = h%*%c%*%t(h)
+  
+  l.lcrash = lcrash - 1.96*sqrt(vlcrash)
+  u.lcrash = lcrash + 1.96*sqrt(vlcrash)
+  lcrashconf = matrix(c(l.lcrash, u.lcrash), nrow = 1, ncol = 2)
+  
+  l.pcrash = qpois(0.025, lambda = lcrash)
+  u.pcrash = qpois(0.975, lambda = lcrash)
+  pcrash = matrix(c(l.pcrash, u.pcrash), nrow = 1, ncol = 2)
+  
+  out = list("par" = estimates, "std. error" = std.err, "Crash intensity" = lcrash, 
+             "CI Crash Intensity" = lcrashconf, "PI Crash" = pcrash, "time" = t)
+  return(out)
+  
+}
+
+##### Function to compute confidence intervals for the difference pi_ne - pi_dk using the profile likelihood #####
+
 pl_diffpi = function(dataDK, dataNE, uDK, uNE, q, measure){
   
   measure1 = measure
