@@ -15,5 +15,5 @@ The functions are all take the following elements as arguments:
 # Date
 The "Date" columns of the dataframes correspond to the time points of the interactions. They have to include date and time in the following format:
 
-y-m-d h:m:s
+year-month-day hour:minute:seconds
 
