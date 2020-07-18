@@ -5,7 +5,7 @@ library('plotrix')
 library('extRemes')
 library('tidyverse')
 
-pi.prof.ci = function(dataDK, dataNE, uDK, uNE, q, measure){
+pl_diffpi = function(dataDK, dataNE, uDK, uNE, q, measure){
   
   measure1 = measure
   thresh1 = uDK
@@ -361,21 +361,6 @@ pi.prof.ci = function(dataDK, dataNE, uDK, uNE, q, measure){
   return(ci)
 }
 
-vals = seq(0, 0.8, by = 0.1)
-results = matrix(nrow = length(vals), ncol = 3)
 
-
-for(i in 1:length(vals)){
-  
-  y = pi.prof.ci(dataDK = dk1, dataNE = ne2, 
-             uDK = 0.88, uNE = 1.4, q = vals[i], measure = "PET")
-  results[i,] = y
-}
-
-par(mar=c(3,5,4,2))
-plotCI(vals, results[,2], ui = results[,3], li = results[,1],
-     main = TeX("Profile likelihood estimate and ci for $\\pi_{c}^{NE2}-\\pi_{c}^{DK1}$ PET"),
-     ylab = TeX('$\\pi_{c}^{NE2}-\\pi_{c}^{DK1}$'), xlab = "s")
-results
 
 
