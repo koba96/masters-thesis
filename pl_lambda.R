@@ -78,7 +78,7 @@ pois.est = function(data, thresh, measure, x){
 
 ##### Profile likelihood confidence intervals ######
 
-proflikest.alt = function(data, thresh1, measure1, x1){
+pl_lambda = function(data, thresh1, measure1, x1){
   data1 = data[data[[measure1]] != -1, ]
   N = length(data[[measure1]])
   data2 = data1[data1[[measure1]]<thresh1, ]
